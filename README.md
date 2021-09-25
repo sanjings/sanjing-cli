@@ -1,4 +1,4 @@
-## 脚手架工具
+## 简易脚手架工具
 #### clone项目
 ```
 git clone https://github.com/sanjings/frontend-cli.git

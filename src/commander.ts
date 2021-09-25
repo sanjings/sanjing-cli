@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
+import { VERSION, CLI_BIN_NAME } from './config';
 
 export interface IOptions {
   force: boolean;
@@ -18,10 +19,10 @@ export const initCommander = (): Promise<any> => {
 
     program
       // 配置版本号信息
-      .version(`v${require('../package.json').version}`)
+      .version(`v${VERSION}`)
       .usage('<command> [option]')
       .on('--help', () => {
-        console.log(`\r\nRun ${chalk.cyan(`i-cli <command> --help`)} for detailed usage of given command\r\n`);
+        console.log(`\r\nRun ${chalk.cyan(`${CLI_BIN_NAME} <command> --help`)} for detailed usage of given command\r\n`);
       });
 
     // 解析用户执行命令传入参数

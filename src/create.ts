@@ -7,6 +7,7 @@ import { loadingFn } from './utils/loading';
 import chalk from 'chalk';
 import downloadGitRepo from 'download-git-repo';
 import symbol from 'log-symbols';
+import { CLI_BIN_NAME } from './config';
 
 export class Create {
   private targetDir: string;
@@ -18,7 +19,7 @@ export class Create {
     this._init();
   }
 
-  private async _init() {
+  private async _init(): void {
     const { targetDir, options } = this;
     // 判断要创建的目录是否存在
     const isExit = fs.existsSync(targetDir);
@@ -30,7 +31,7 @@ export class Create {
         this._createProject();
       } else {
         console.log(`\r\n${symbol.error} Target directory already exists. Please use add -f to overwrite it.`);
-        console.log(`Run ${chalk.cyan(`i-cli init --help`)} for detail.\r\n`);
+        console.log(`Run ${chalk.cyan(`${CLI_BIN_NAME} init --help`)} for detail.\r\n`);
         return;
       }
     } else {
