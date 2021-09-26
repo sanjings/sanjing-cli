@@ -12,11 +12,11 @@ export const loadingFn = async (fn: Function, message = 'loading...', ...args: a
     const result = await fn(...args);
     // 状态为修改为成功
     loading.succeed();
-    return result;
+    return result || true;
   } catch (error) {
     // 状态为修改为失败
     loading.fail();
-    console.log(`failed: ${chalk.red(`${error}`)}`);
-    return error;
+    console.log(`${chalk.red('failed:')} ${error}`);
+    return false;
   }
 };

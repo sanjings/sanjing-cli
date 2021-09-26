@@ -19,7 +19,7 @@ export class Create {
     this._init();
   }
 
-  private async _init(): void {
+  private async _init() {
     const { targetDir, options } = this;
     // 判断要创建的目录是否存在
     const isExit = fs.existsSync(targetDir);
@@ -82,10 +82,12 @@ export class Create {
     const { projectName, targetDir } = this;
     const requestUrl = `github:sanjings/${tmpName}`;
     const down = util.promisify(downloadGitRepo);
-    await loadingFn(down, 'downloading template. please wait ...', requestUrl, targetDir);
-    console.log(`\r\n${symbol.success} Successfully created project ${chalk.cyan(projectName)}!`);
-    console.log(`\r\ncd ${chalk.cyan(projectName)}`);
-    console.log('yarn');
-    console.log('yarn dev\r\n');
+    const result = await loadingFn(down, 'downloading template. please wait ...', requestUrl, targetDir);
+    if (result) {
+      console.log(`\r\n${symbol.success} Successfully created project ${chalk.cyan(projectName)}!`);
+      console.log(`\r\ncd ${chalk.cyan(projectName)}`);
+      console.log('yarn');
+      console.log('yarn dev\r\n');
+    }
   }
 }
