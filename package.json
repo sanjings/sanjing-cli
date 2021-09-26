@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "前端简易脚手架",
   "main": "index.js",
-  "author": {
-    "name": "sanjing",
-    "email": "371201455@qq.com"
+  "author": "sanjing",
+  "homepage": "https://github.com/sanjings/sanjing-cli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sanjings/sanjing-cli.git"
   },
   "bin": {
     "s-cli": "./bin/cmd",
@@ -15,6 +17,9 @@
     "dev": "tsc -w"
   },
   "keywords": [
+    "cli",
+    "sanjing-cli",
+    "前端",
     "脚手架"
   ],
   "license": "ISC",
