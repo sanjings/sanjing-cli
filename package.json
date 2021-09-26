@@ -2,6 +2,7 @@
   "name": "sanjing-cli",
   "version": "1.0.0",
   "description": "前端简易脚手架",
+  "main": "index.js",
   "author": {
     "name": "sanjing",
     "email": "371201455@qq.com"

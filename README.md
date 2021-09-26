@@ -1,7 +1,7 @@
 ## 简易脚手架工具
 #### clone项目
 ```
-git clone https://github.com/sanjings/frontend-cli.git
+git clone https://github.com/sanjings/sanjing-cli.git
 ```
 #### 安装依赖（推荐使用yarn）
 ```
