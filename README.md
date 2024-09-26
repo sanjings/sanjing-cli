@@ -5,14 +5,14 @@ git clone https://github.com/sanjings/sanjing-cli.git
 ```
 #### 安装依赖（推荐使用yarn）
 ```
-npm install or yarn
+npm install
 or
 yarn
 ```
 
 #### 本地编译
 ```
-yarn dev or npm run dev
+npm run dev or yarn dev
 npm link
 s-cli -V 版本号
 s-cli -h 帮助

@@ -35,9 +35,17 @@ export const templatePrompy = async () => {
       message: 'Please choose a template to create project.',
       choices: [
         {
-          name: 'vue2-spa',
-          value: 'vue2-spa-template'
-        }
+          name: 'vue2-element',
+          value: 'vue2-template'
+        },
+        {
+          name: 'vue3-admin-element',
+          value: 'vue3-admin-element'
+        },
+        {
+          name: 'uni-ts',
+          value: 'uni-vscode-ts-template'
+        },
         // ...todo
       ]
     }
