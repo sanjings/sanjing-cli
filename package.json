@@ -1,8 +1,9 @@
 {
   "name": "sanjing-cli",
-  "version": "1.0.1",
-  "description": "前端简易脚手架",
-  "main": "index.js",
+  "version": "1.1.0",
+  "description": "前端简易脚手架工具",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "author": {
     "name": "sanjing",
     "email": "sanjings@qq.com"
@@ -11,23 +12,38 @@
     "s-cli": "./bin/cmd",
     "sanjing-cli": "./bin/cmd"
   },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "scripts": {
-    "dev": "tsc -w"
+    "build": "tsc",
+    "dev": "tsc -w",
+    "prepublishOnly": "npm run build",
+    "clean": "rimraf dist"
   },
   "keywords": [
-    "脚手架"
+    "cli",
+    "scaffold",
+    "脚手架",
+    "vue",
+    "template"
   ],
   "license": "ISC",
-  "devDependencies": {
-    "@types/inquirer": "^8.1.2",
-    "@types/node": "^16.9.6",
-    "chalk": "^4.1.2",
-    "commander": "^8.2.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
     "download-git-repo": "^3.0.2",
-    "inquirer": "^8.1.5",
-    "log-symbols": "^4.1.0",
-    "ora": "^5.4.1",
-    "tsc": "^2.0.3",
-    "typescript": "^4.4.3"
+    "inquirer": "^8.2.6",
+    "log-symbols": "^7.0.1",
+    "ora": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.9",
+    "@types/node": "^25.0.3",
+    "typescript": "^5.9.3"
   }
 }
