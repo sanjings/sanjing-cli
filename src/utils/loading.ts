@@ -1,41 +1,30 @@
-import ora, { Ora } from "ora";
+/**
+ * 给异步步骤加 ora 转圈：下载模板 / 复制目录可能较慢，避免用户以为卡死。
+ *
+ * 约定：内部任务抛错时，先 `spinner.fail()` 再打一行红色 Failed，然后把 **同一个 error**
+ * 继续往上抛，这样 createProject 不用解析返回值是 false 还是异常。
+ */
 import chalk from "chalk";
+import ora, { type Ora } from "ora";
 
-/**
- * 加载函数类型定义
- */
-type LoadingFunction<T extends any[] = any[], R = any> = (
-  ...args: T
-) => Promise<R>;
+type AsyncFn<T extends unknown[] = unknown[], R = unknown> = (...args: T) => Promise<R>;
 
-/**
- * 带加载提示的异步函数执行器
- * @param fn 要执行的异步函数
- * @param message 加载提示信息
- * @param args 传递给函数的参数
- * @returns 函数执行结果，失败时返回 false
- */
-export const loadingFn = async <T extends any[] = any[], R = any>(
-  fn: LoadingFunction<T, R>,
+export async function loadingFn<T extends unknown[] = unknown[], R = unknown>(
+  fn: AsyncFn<T, R>,
   message = "Loading...",
   ...args: T
-): Promise<R | false> => {
-  // 使用 ora 初始化，传入提示信息 message
-  const loading: Ora = ora(message);
-  // 开始加载动画
-  loading.start();
+): Promise<R> {
+  const spinner: Ora = ora(message);
+  spinner.start();
 
   try {
-    // 执行传入方法 fn
     const result = await fn(...args);
-    // 状态修改为成功
-    loading.succeed();
-    return result !== undefined && result !== null ? result : (true as R);
+    spinner.succeed();
+    return result;
   } catch (error) {
-    // 状态修改为失败
-    loading.fail();
+    spinner.fail();
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.log(`${chalk.red("Failed:")} ${errorMessage}`);
-    return false as R | false;
+    throw error;
   }
-};
+}
