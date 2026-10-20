@@ -8,10 +8,9 @@
 import { execSync } from "node:child_process";
 import { existsSync, rmSync, statSync } from "node:fs";
 import { cp, stat } from "node:fs/promises";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 
 import chalk from "chalk";
-import { downloadTemplate } from "giget";
 import symbol from "log-symbols";
 import validateNpmPackageName from "validate-npm-package-name";
 
@@ -23,6 +22,7 @@ import { loadingFn } from "./utils/loading.js";
 import { detectPackageManager, formatDevCommand, formatInstallCommand } from "./utils/pm.js";
 import { rewritePackageJsonName } from "./utils/pkg-name.js";
 import { renderTemplatePlaceholders } from "./utils/render.js";
+import { SKIP_DIR_NAMES } from "./utils/skip-names.js";
 import { resolveTemplateSpec } from "./utils/template-resolve.js";
 
 /**
@@ -81,10 +81,12 @@ export async function createProject(projectName: string, options: InitOptions): 
     await loadingFn(() => copyLocalTemplate(resolved.absolutePath, targetDir), "Copying local template...");
   } else {
     /**
-     * giget 的 `dir` 指定解压目标；`force: true` 表示允许覆盖已存在文件。
+     * giget 按需加载：本地模板路径不必拉进 giget。
+     * `dir` 指定解压目标；`force: true` 表示允许覆盖已存在文件。
      * 我们在上面已对「整目录冲突」做了 rm 或用户确认，这里传 force 主要是防止
      * giget 在部分边缘场景下因「目录非空」而拒绝写入。
      */
+    const { downloadTemplate } = await import("giget");
     await loadingFn(
       () =>
         downloadTemplate(resolved.source, {
@@ -130,13 +132,19 @@ function assertValidPackageName(name: string): boolean {
   return false;
 }
 
-/** 递归复制本地文件夹；源必须是目录，否则及早失败（避免 cp 出费解报错） */
-async function copyLocalTemplate(src: string, dest: string): Promise<void> {
+/**
+ * 递归复制本地文件夹；源必须是目录，否则及早失败（避免 cp 出费解报错）。
+ * 过滤 node_modules / .git / 构建产物，防止把模板机的环境脏数据带进新项目。
+ */
+export async function copyLocalTemplate(src: string, dest: string): Promise<void> {
   const st = await stat(src);
   if (!st.isDirectory()) {
     throw new Error(`Local template is not a directory: ${src}`);
   }
-  await cp(src, dest, { recursive: true });
+  await cp(src, dest, {
+    recursive: true,
+    filter: (sourcePath) => !SKIP_DIR_NAMES.has(basename(sourcePath)),
+  });
 }
 
 /**
