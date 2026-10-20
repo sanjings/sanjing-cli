@@ -1,21 +1,32 @@
 /**
  * CLI 进程入口（对应 package.json 里 bin 指向的 ../dist/index.js）。
  *
- * 启动顺序：先用 update-notifier 检查 npm 上是否有新版本 → parseCli 解析子命令 →
- * list 只打印模板表；init 则进入 createProject。全局注册的两个 process.on 是兜底：
- * 防止某个路径忘记 await 导致进程静默退出或悬挂 Promise。
+ * 启动顺序：parseCli 解析子命令 → list 只打印模板表；init 则动态加载 createProject。
+ * update-notifier 延后到 setImmediate，避免拖慢 list / -v 等轻量路径。
+ * 全局注册的两个 process.on 是兜底：防止某个路径忘记 await 导致进程静默退出或悬挂 Promise。
  */
 import chalk from "chalk";
 import symbol from "log-symbols";
-import updateNotifier from "update-notifier";
 
 import { parseCli } from "./commander.js";
-import { pkgForNotifier } from "./config.js";
-import { createProject } from "./create.js";
 import { printBuiltinTemplates } from "./list.js";
 
-/** 全局安装时提示升级；isGlobal 避免在本地开发仓库里误提示 */
-updateNotifier({ pkg: pkgForNotifier }).notify({ isGlobal: true });
+/**
+ * 全局安装时提示升级；isGlobal 避免在本地开发仓库里误提示。
+ * 动态 import + setImmediate：不阻塞当前命令的主路径。
+ */
+function scheduleUpdateCheck(): void {
+  setImmediate(() => {
+    void import("./config.js")
+      .then(async ({ pkgForNotifier }) => {
+        const { default: updateNotifier } = await import("update-notifier");
+        updateNotifier({ pkg: pkgForNotifier }).notify({ isGlobal: true });
+      })
+      .catch(() => {
+        /* notifier 失败不影响业务 */
+      });
+  });
+}
 
 /**
  * 业务入口（也可被其它模块 import 做集成测试）。
@@ -29,12 +40,14 @@ updateNotifier({ pkg: pkgForNotifier }).notify({ isGlobal: true });
 export async function init(): Promise<void> {
   try {
     const action = await parseCli();
+    scheduleUpdateCheck();
 
     if (action.type === "list") {
       printBuiltinTemplates();
       return;
     }
 
+    const { createProject } = await import("./create.js");
     await createProject(action.projectName, action.options);
   } catch (error) {
     if (error instanceof Error) {

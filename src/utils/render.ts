@@ -3,18 +3,17 @@
  *
  * 设计取舍：
  * - 不用 Handlebars/ejs：依赖少、行为直观；代价是不能写逻辑分支。
- * - 按扩展名白名单过滤：避免把图片、字体当 UTF-8 读坏。
- * - 动态 import fs/promises：让本文件顶层 lighter（次要），主要逻辑仍是遍历。
+ * - 按扩展名 / 点文件白名单过滤：避免把图片、字体当 UTF-8 读坏。
+ * - 读写并行：收集路径后 Promise.all，缩短大模板的渲染时间。
  *
  * 若模板里故意包含字面量 `{{projectName}}` 且不应替换，当前实现无法区分，需改模板。
  */
-import { readdir } from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-/** 不解压 / 不遍历的目录：依赖安装产物与版本库 */
-const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "build", "coverage"]);
+import { SKIP_DIR_NAMES } from "./skip-names.js";
 
-/** 认为是「文本」的扩展名；不在表里的文件一律跳过 */
+/** 认为是「文本」的扩展名；不在表里的文件一律跳过（点文件另有规则） */
 const TEXT_EXT = new Set([
   ".md",
   ".html",
@@ -31,6 +30,21 @@ const TEXT_EXT = new Set([
   ".less",
   ".yaml",
   ".yml",
+  ".txt",
+  ".toml",
+  ".svg",
+  ".xml",
+]);
+
+/**
+ * 无标准扩展名、但仍应按文本替换的点文件（及 `.env*` 族由 isTextFile 单独判断）。
+ */
+const DOTFILE_TEXT_NAMES = new Set([
+  ".gitignore",
+  ".npmrc",
+  ".editorconfig",
+  ".prettierignore",
+  ".prettierrc",
 ]);
 
 export interface RenderVars {
@@ -47,24 +61,24 @@ export async function renderTemplatePlaceholders(rootDir: string, vars: RenderVa
     year: vars.year,
   };
 
-  const { readFile, writeFile } = await import("node:fs/promises");
+  await Promise.all(files.map((file) => renderOneFile(file, map)));
+}
 
-  for (const file of files) {
-    let content: string;
-    try {
-      content = await readFile(file, "utf8");
-    } catch {
-      continue;
-    }
+async function renderOneFile(file: string, map: Record<string, string>): Promise<void> {
+  let content: string;
+  try {
+    content = await readFile(file, "utf8");
+  } catch {
+    return;
+  }
 
-    let next = content;
-    for (const [key, value] of Object.entries(map)) {
-      next = next.replaceAll(`{{${key}}}`, value);
-    }
+  let next = content;
+  for (const [key, value] of Object.entries(map)) {
+    next = next.replaceAll(`{{${key}}}`, value);
+  }
 
-    if (next !== content) {
-      await writeFile(file, next, "utf8");
-    }
+  if (next !== content) {
+    await writeFile(file, next, "utf8");
   }
 }
 
@@ -83,20 +97,28 @@ async function walk(current: string, acc: string[]): Promise<void> {
     return;
   }
 
+  const subdirs: string[] = [];
+
   for (const entry of entries) {
-    if (entry.name.startsWith(".")) continue;
-    if (SKIP_DIRS.has(entry.name)) continue;
+    if (SKIP_DIR_NAMES.has(entry.name)) continue;
 
     const full = join(current, entry.name);
     if (entry.isDirectory()) {
-      await walk(full, acc);
-    } else if (entry.isFile()) {
-      const ext = getExt(entry.name);
-      if (TEXT_EXT.has(ext)) {
-        acc.push(full);
-      }
+      subdirs.push(full);
+    } else if (entry.isFile() && isTextFile(entry.name)) {
+      acc.push(full);
     }
   }
+
+  await Promise.all(subdirs.map((dir) => walk(dir, acc)));
+}
+
+/** 扩展名白名单，或 `.env*` / 常见点文件 */
+export function isTextFile(filename: string): boolean {
+  if (TEXT_EXT.has(getExt(filename))) return true;
+  if (filename.startsWith(".env")) return true;
+  if (DOTFILE_TEXT_NAMES.has(filename)) return true;
+  return false;
 }
 
 function getExt(filename: string): string {
