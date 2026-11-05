@@ -7,7 +7,7 @@
 
 ## 当前状态
 
-`main` 在 npm 已发布版本 **1.1.0** 之后还有未发版变更，包括 [#1](https://github.com/sanjings/sanjing-cli/pull/1) 的冷启动与本地模板生成，以及 [#7](https://github.com/sanjings/sanjing-cli/pull/7) 的 CI pnpm 版本读取。npm 徽章显示的是 registry 里的 **1.1.0**。`pnpm add -g sanjing-cli` 与 `npm i -g sanjing-cli` 装到的也是这个已发布版本。
+`main` 在 npm 已发布版本 **1.1.0** 之后还有未发版变更，包括 [#1](https://github.com/sanjings/sanjing-cli/pull/1) 的冷启动与本地模板生成，以及 [#7](https://github.com/sanjings/sanjing-cli/pull/7) 的 CI pnpm 版本读取。这些差异记在 [CHANGELOG.md](CHANGELOG.md)。npm 徽章显示的是 registry 里的 **1.1.0**。`pnpm add -g sanjing-cli` 与 `npm i -g sanjing-cli` 装到的也是这个已发布版本。
 
 - **本周期暂不推 npm**。本周期不执行 `npm publish`，也不为这些未发版变更打 tag 或开 Release。
 - **内置模板暂不刷新**。内置模板继续使用现有来源（`vue2-template`、`vue3-element-admin`、`uni-vscode-ts-template`）。本周期不改模板源、不改模板内容，也不挂、不切换到私有仓库（例如 `vue3-admin-starter`、`uniapp-starter`）。
