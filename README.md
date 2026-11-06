@@ -63,36 +63,10 @@ s-cli init my-app -t ./my-local-template
 ```bash
 pnpm install
 pnpm run build
-```
-
-不设全局命令也可调试（推荐）：用脚本入口，`--` 后面接和普通 CLI 一样的参数：
-
-```bash
 pnpm run cli -- list
-pnpm run cli -- init demo-app -t vue3-element-admin
 ```
 
-另开一个终端跑 `pnpm run dev`（`tsc -w`），改 TS 会自动编译 `dist/`，再重复执行上面的 `pnpm run cli -- …`。
-
-### 可选：`pnpm link --global` 与本机 pnpm 全局目录
-
-若执行 `pnpm config get global-bin-dir` 为 **空 / undefined**，说明还没配置全局 bin 目录，`pnpm link --global` 会失败。可先手动指定（路径按你机器调整，目录需存在）：
-
-**Windows（CMD）示例：**
-
-```bat
-mkdir "%LOCALAPPDATA%\pnpm" 2>nul
-pnpm config set global-bin-dir "%LOCALAPPDATA%\pnpm"
-```
-
-然后把 **`%LOCALAPPDATA%\pnpm`**（展开后的完整路径）加入用户 **PATH**，执行一次 **`pnpm setup`** 或重启终端 / IDE 后再试：
-
-```bash
-pnpm link --global
-s-cli list
-```
-
-脚本一览：`pnpm run cli`（跑编译产物）、`pnpm run dev`（监听编译）、`pnpm run test`、`pnpm run lint`、`pnpm run format`。
+`pnpm run cli` 跑编译产物，`--` 后面接和全局命令一样的参数。改 TypeScript 时另开终端执行 `pnpm run dev`（`tsc -w`）。全局联调（先 `build` 再 `pnpm link --global`，以及 Windows 上 `global-bin-dir` 为空时怎么配）见 [本地调试](docs/local-dev.md)。
 
 持续集成仍由 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) 在 push / PR 上跑 `lint` + `build` + `test`。
 
