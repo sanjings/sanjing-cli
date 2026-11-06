@@ -14,6 +14,7 @@ npm 上目前的版本是 **1.0.1**（2026-01-06）和 **1.1.0**（2026-05-05）
 
 - 为占位符渲染、命令行解析和本地模板复制补充单元测试（[#1](https://github.com/sanjings/sanjing-cli/pull/1)）。
 - 新增本变更记录，并在 README 中链到此文件（[#4](https://github.com/sanjings/sanjing-cli/issues/4)）。
+- 仓库根目录增加 ISC `LICENSE`，与 `package.json` 的 `license` 一致（[#5](https://github.com/sanjings/sanjing-cli/issues/5)）。
 
 ### Changed
 
